@@ -2,22 +2,10 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from search import buscar_contexto
+from search import retrieve_context
+from config import LLM_PROVIDER, LLM_MODEL # Importa as configurações do novo módulo config
 
 load_dotenv()
-
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower() # Default to gemini
-
-if LLM_PROVIDER == "gemini":
-    if not os.getenv("GOOGLE_API_KEY"):
-        raise ValueError("A variável GOOGLE_API_KEY não está configurada no .env para o provedor Gemini.")
-    LLM_MODEL = os.getenv("GEMINI_LLM_MODEL", "gemini-2.5-flash-lite")
-elif LLM_PROVIDER == "openai":
-    if not os.getenv("OPENAI_API_KEY"):
-        raise ValueError("A variável OPENAI_API_KEY não está configurada no .env para o provedor OpenAI.")
-    LLM_MODEL = os.getenv("OPENAI_LLM_MODEL", "gpt-3.5-turbo") # gpt-5-nano is not a real model, using gpt-3.5-turbo as a placeholder
-else:
-    raise ValueError("LLM_PROVIDER deve ser 'gemini' ou 'openai'.")
 
 # Instancia a LLM exigida no desafio
 # Usamos temperature=0 para que o modelo seja estritamente factual e não invente respostas
@@ -78,7 +66,7 @@ def _handle_exit_commands(query: str) -> bool:
 def _retrieve_context(query: str, k: int = 10) -> str:
     """Busca os chunks mais relevantes no banco de dados vetorial."""
     try:
-        context = retrieve_context(query, k=k)
+        context = retrieve_context(query, k=k) 
         if not context.strip():
             print(
                 "RESPOSTA: Não tenho informações necessárias para responder sua pergunta, pois nenhum contexto relevante foi encontrado.\n"

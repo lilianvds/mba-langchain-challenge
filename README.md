@@ -48,13 +48,13 @@ DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/rag
 
 # Variáveis para Gemini (se LLM_PROVIDER estiver configurado como 'gemini')
 GOOGLE_API_KEY=sua_chave_do_google_aqui
-GEMINI_EMBEDDING_MODEL=models/embedding-001
-GEMINI_LLM_MODEL=gemini-2.5-flash-lite
+GEMINI_EMBEDDING_MODEL=models/text-embedding-004 
+GEMINI_LLM_MODEL=gemini-1.5-flash-lite
 
 # Variáveis para OpenAI (se LLM_PROVIDER=openai)
 OPENAI_API_KEY=sk-sua_chave_da_api_aqui
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
-OPENAI_LLM_MODEL=gpt-3.5-turbo # gpt-5-nano não é um modelo real, usando gpt-3.5-turbo como placeholder
+OPENAI_LLM_MODEL=gpt-3.5-turbo
 
 ##  Como Executar o Projeto
 
