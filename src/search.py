@@ -1,29 +1,47 @@
-PROMPT_TEMPLATE = """
-CONTEXTO:
-{contexto}
+import os
+from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_postgres import PGVector
+from config import DB_URL, LLM_PROVIDER, EMBEDDING_MODEL, COLLECTION_NAME
 
-REGRAS:
-- Responda somente com base no CONTEXTO.
-- Se a informação não estiver explicitamente no CONTEXTO, responda:
-  "Não tenho informações necessárias para responder sua pergunta."
-- Nunca invente ou use conhecimento externo.
-- Nunca produza opiniões ou interpretações além do que está escrito.
 
-EXEMPLOS DE PERGUNTAS FORA DO CONTEXTO:
-Pergunta: "Qual é a capital da França?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
+def _get_embeddings_model():
+    """Returns the configured embeddings model (Gemini or OpenAI)."""
+    print(f"⚙️ Using LLM provider: {LLM_PROVIDER} with embedding model: {EMBEDDING_MODEL}")
+    if LLM_PROVIDER == "gemini":
+        return GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL)
+    else:  # openai
+        return OpenAIEmbeddings(model=EMBEDDING_MODEL)
 
-Pergunta: "Quantos clientes temos em 2024?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
 
-Pergunta: "Você acha isso bom ou ruim?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
+def _initialize_vector_store():
+    """Inicializa a conexão com o banco vetorial."""
+    embeddings = _get_embeddings_model()
+    return PGVector(
+        embeddings=embeddings,
+        collection_name=COLLECTION_NAME,
+        connection=DB_URL,
+        use_jsonb=True,
+    )
 
-PERGUNTA DO USUÁRIO:
-{pergunta}
 
-RESPONDA A "PERGUNTA DO USUÁRIO"
-"""
+def _perform_similarity_search(vector_store: PGVector, query: str, k: int):
+    """Performs a similarity search in the vector store."""
+    return vector_store.similarity_search_with_score(query, k=k)
 
-def search_prompt(question=None):
-    pass
+
+def _format_retrieved_chunks(results) -> str:
+    """Formats the retrieved chunks into a single string."""
+    chunks = [doc.page_content for doc, score in results]
+    return "\n\n".join(chunks)
+
+
+def retrieve_context(query: str, k: int = 10) -> str:
+    """
+    Vectorizes the query and searches for the 'k' most relevant results in the database.
+    Retorna o texto concatenado dos chunks encontrados.
+    """
+    vector_store = _initialize_vector_store()
+    results = _perform_similarity_search(vector_store, query, k)
+    context = _format_retrieved_chunks(results)
+    return context

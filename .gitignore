@@ -1,0 +1,25 @@
+cat << 'EOF' > .gitignore
+# Arquivos de ambiente e chaves (MUITO IMPORTANTE)
+.env
+
+# Ambientes Virtuais Python
+venv/
+env/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Volumes do Docker (Dados do PostgreSQL)
+postgres_data/
+
+# Arquivos de IDE (VS Code, IntelliJ, etc)
+.vscode/
+.idea/
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+EOF
